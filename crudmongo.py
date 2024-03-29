@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from bson import ObjectId
 
 link = "mongodb://localhost:27017/"
 
@@ -8,8 +9,8 @@ collection = "personas"
 def coneccionBD():
     client = MongoClient(link)
     db = client[database]
-    collection = db[collection]
-    return collection
+    collections = db[collection]
+    return collections
 
 
 def crearDocumento(data):
@@ -31,9 +32,18 @@ def actualizarDocumento(id, data):
 
 
 def eliminarDocumento(id):
-    collection = coneccionBD()
-    collection.delete_one({"_id": id})
-    print("Comando ejecutado Correctamente!")
+    try:
+        collection = coneccionBD()
+        obj_id = ObjectId(id)
+        result = collection.delete_one({"_id": obj_id})
+        if result.deleted_count == 1:
+            print("Documento eliminado correctamente")
+        else:
+            print("No se encontró ningún documento para eliminar con la ID proporcionada")
+    except Exception as e:
+        print("Ocurrió un error al intentar eliminar el documento:", e)
+
+
 
 
 while True:
@@ -55,11 +65,11 @@ while True:
     elif i == '3':
         id = input("Ingrese el Id: ")
         update_data = {"$set": {}} 
-        update_data["$set"]["name"] = input("Enter new name: ")
-        update_data["$set"]["nota"] = int(input("Enter new name: "))
+        update_data["$set"]["materia"] = input("materia: ")
+        update_data["$set"]["nota"] = int(input("nota: "))
         actualizarDocumento(id, update_data)
     elif i == '4':
-        id= input("Ingrese el id del documento a eliminar")
+        id= input("Ingrese el id del documento a eliminar: ")
         eliminarDocumento(id)
     elif i == '5':
         print("Programa finalizado.")
